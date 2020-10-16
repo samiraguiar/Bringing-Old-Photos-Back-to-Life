@@ -103,8 +103,9 @@ class Pix2PixModel(torch.nn.Module):
         # data['label'] = data['label'].long()
 
         if self.opt.isTrain is False:
-            data["label"] = data["label"].cuda()
-            data["image"] = data["image"].cuda()
+            if torch.cuda.is_available():
+                data["label"] = data["label"].cuda()
+                data["image"] = data["image"].cuda()
             return data["label"], data["image"], data["image"]
         ## While testing, the input image is the degraded face
 
@@ -242,4 +243,4 @@ class Pix2PixModel(torch.nn.Module):
         return eps.mul(std) + mu
 
     def use_gpu(self):
-        return len(self.opt.gpu_ids) > 0
+        return torch.cuda.is_available() and len(self.opt.gpu_ids) > 0

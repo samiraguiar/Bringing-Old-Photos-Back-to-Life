@@ -133,19 +133,20 @@ class Pix2PixHDModel_Mapping(BaseModel):
             self.netG_A.eval()
             self.netG_B.eval()
 
-        self.netG_A.cuda(opt.gpu_ids[0])
-        self.netG_B.cuda(opt.gpu_ids[0])
-        self.mapping_net.cuda(opt.gpu_ids[0])
+        if torch.cuda.is_available():
+            self.netG_A.cuda(opt.gpu_ids[0])
+            self.netG_B.cuda(opt.gpu_ids[0])
+            self.mapping_net.cuda(opt.gpu_ids[0])
         self.load_network(self.mapping_net, "mapping_net", opt.which_epoch)
 
     def inference(self, label, inst):
-
-        input_concat = label.data.cuda()
+        input_concat = label.data.cuda() if torch.cuda.is_available() else label.data
 
         label_feat = self.netG_A.forward(input_concat, flow="enc")
 
         if self.opt.NL_use_mask:
-            label_feat_map = self.mapping_net(label_feat.detach(), inst.cuda())
+            inst = inst.cuda() if torch.cuda.is_available() else inst
+            label_feat_map = self.mapping_net(label_feat.detach(), inst)
         else:
             label_feat_map = self.mapping_net(label_feat.detach())
 

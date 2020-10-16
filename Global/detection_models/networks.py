@@ -326,7 +326,9 @@ if __name__ == "__main__":
     print("cyclegan unet:")
     summary(model_pix2pix, (3, 256, 256))
 
-    x = torch.zeros(1, 3, 256, 256).requires_grad_(True).cuda()
+    x = torch.zeros(1, 3, 256, 256).requires_grad_(True)
+    if torch.cuda.is_available():
+        x = x.cuda()
     g = make_dot(model(x))
     g.render("models/Digraph.gv", view=False)
 
